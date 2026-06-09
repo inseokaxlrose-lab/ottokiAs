@@ -20,11 +20,11 @@ export async function sendAsConfirmEmail(params: {
   await getResend().emails.send({
     from: FROM(),
     to: email,
-    subject: `[OTTOKI] AS 접수가 완료되었습니다 — ${receiptNumber}`,
+    subject: `[AINC] AS 접수가 완료되었습니다 — ${receiptNumber}`,
     html: `
       <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
         <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">OTTOKI 서비스 센터</h1>
+          <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
           <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">AS 접수가 완료되었습니다</h2>
 
           <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
@@ -45,7 +45,7 @@ export async function sendAsConfirmEmail(params: {
           </table>
 
           <p style="color: #94a3b8; font-size: 13px; margin: 0; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-            접수 현황은 OTTOKI 서비스 센터에서 접수번호로 확인하실 수 있습니다.
+            접수 현황은 AINC 서비스 센터에서 접수번호로 확인하실 수 있습니다.
           </p>
         </div>
       </div>
@@ -63,11 +63,11 @@ export async function sendPurchaseConfirmEmail(params: {
   await getResend().emails.send({
     from: FROM(),
     to: email,
-    subject: '[OTTOKI] 구매 문의가 접수되었습니다',
+    subject: '[AINC] 구매 문의가 접수되었습니다',
     html: `
       <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
         <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <h1 style="color: #7c3aed; font-size: 22px; margin: 0 0 8px;">OTTOKI 서비스 센터</h1>
+          <h1 style="color: #7c3aed; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
           <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">구매 문의가 접수되었습니다</h2>
 
           <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
@@ -95,11 +95,11 @@ export async function sendAsPaymentConfirmedEmail(params: {
   await getResend().emails.send({
     from: FROM(),
     to: email,
-    subject: `[OTTOKI] 수리비 입금이 확인되었습니다 — ${receiptNumber}`,
+    subject: `[AINC] 수리비 입금이 확인되었습니다 — ${receiptNumber}`,
     html: `
       <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
         <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">OTTOKI 서비스 센터</h1>
+          <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
           <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">수리비 입금이 확인되었습니다</h2>
 
           <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
@@ -144,11 +144,11 @@ export async function sendAsShippedEmail(params: {
   await getResend().emails.send({
     from: FROM(),
     to: email,
-    subject: `[OTTOKI] 제품이 발송되었습니다 — ${receiptNumber}`,
+    subject: `[AINC] 제품이 발송되었습니다 — ${receiptNumber}`,
     html: `
       <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
         <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">OTTOKI 서비스 센터</h1>
+          <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
           <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">수리 완료 후 제품이 발송되었습니다</h2>
 
           <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
@@ -182,11 +182,11 @@ export async function sendPurchaseConfirmedEmail(params: {
   await getResend().emails.send({
     from: FROM(),
     to: email,
-    subject: '[OTTOKI] 구매 주문이 확인되었습니다',
+    subject: '[AINC] 구매 주문이 확인되었습니다',
     html: `
       <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
         <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <h1 style="color: #7c3aed; font-size: 22px; margin: 0 0 8px;">OTTOKI 서비스 센터</h1>
+          <h1 style="color: #7c3aed; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
           <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">구매 주문이 확인되었습니다</h2>
 
           <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
@@ -221,7 +221,7 @@ export async function sendPurchaseAdminAlert(params: {
   await getResend().emails.send({
     from: FROM(),
     to: adminEmail,
-    subject: '[OTTOKI 관리] 신규 구매 문의가 접수되었습니다',
+    subject: '[AINC 관리] 신규 구매 문의가 접수되었습니다',
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
         <h2 style="color: #7c3aed;">신규 구매 문의 접수 알림</h2>
