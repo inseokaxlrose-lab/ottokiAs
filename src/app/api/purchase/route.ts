@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-// import { sendPurchaseConfirmEmail, sendPurchaseAdminAlert } from '@/lib/email'
+import { sendPurchaseConfirmEmail, sendPurchaseAdminAlert } from '@/lib/email'
 import { notifyPurchaseSubmit } from '@/lib/slack'
 
 export async function POST(req: NextRequest) {
@@ -78,8 +78,8 @@ export async function POST(req: NextRequest) {
 
     // 고객 확인 이메일 + 관리자 알림 이메일 + Slack 알림 발송
     await Promise.allSettled([
-      // sendPurchaseConfirmEmail({ email, customerName }),
-      // sendPurchaseAdminAlert({ customerName, phone, email, productName, quantity, inquiry, businessDocUrl }),
+      sendPurchaseConfirmEmail({ email, customerName }),
+      sendPurchaseAdminAlert({ customerName, phone, email, productName, quantity, inquiry, businessDocUrl }),
       notifyPurchaseSubmit({ customerName, phone, productName, quantity }),
     ])
 

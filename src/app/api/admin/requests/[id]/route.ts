@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-// import { sendAsPaymentConfirmedEmail, sendAsShippedEmail } from '@/lib/email'
+import { sendAsPaymentConfirmedEmail, sendAsShippedEmail } from '@/lib/email'
 
 // 접수 상태 변경 및 AS 결과 등록
 export async function PATCH(
@@ -47,35 +47,35 @@ export async function PATCH(
       await supabase.from('as_status_history').insert({ request_id: id, status })
     } catch { /* 테이블 미생성 시 무시 */ }
 
-    // 특정 상태 변경 시 고객 이메일 발송 (비활성화)
-    // if (status === 'payment_confirmed' || status === 'shipped') {
-    //   const { data: req } = await supabase
-    //     .from('as_requests')
-    //     .select('email, customer_name, receipt_number, courier_company, tracking_number')
-    //     .eq('id', id)
-    //     .single()
-    //   if (req?.email) {
-    //     if (status === 'payment_confirmed') {
-    //       await Promise.allSettled([
-    //         sendAsPaymentConfirmedEmail({
-    //           email: req.email,
-    //           customerName: req.customer_name,
-    //           receiptNumber: req.receipt_number,
-    //         }),
-    //       ])
-    //     } else if (status === 'shipped') {
-    //       await Promise.allSettled([
-    //         sendAsShippedEmail({
-    //           email: req.email,
-    //           customerName: req.customer_name,
-    //           receiptNumber: req.receipt_number,
-    //           courierCompany: req.courier_company ?? null,
-    //           trackingNumber: req.tracking_number ?? null,
-    //         }),
-    //       ])
-    //     }
-    //   }
-    // }
+    // 특정 상태 변경 시 고객 이메일 발송
+    if (status === 'payment_confirmed' || status === 'shipped') {
+      const { data: reqData } = await supabase
+        .from('as_requests')
+        .select('email, customer_name, receipt_number, courier_company, tracking_number')
+        .eq('id', id)
+        .single()
+      if (reqData?.email) {
+        if (status === 'payment_confirmed') {
+          await Promise.allSettled([
+            sendAsPaymentConfirmedEmail({
+              email: reqData.email,
+              customerName: reqData.customer_name,
+              receiptNumber: reqData.receipt_number,
+            }),
+          ])
+        } else if (status === 'shipped') {
+          await Promise.allSettled([
+            sendAsShippedEmail({
+              email: reqData.email,
+              customerName: reqData.customer_name,
+              receiptNumber: reqData.receipt_number,
+              courierCompany: reqData.courier_company ?? null,
+              trackingNumber: reqData.tracking_number ?? null,
+            }),
+          ])
+        }
+      }
+    }
   }
 
   // AS 결과 등록/수정 — 기존 행 모두 삭제 후 새로 삽입 (중복 행 방지)
