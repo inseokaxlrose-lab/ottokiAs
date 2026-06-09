@@ -10,8 +10,8 @@ const geistSans = Geist({
 })
 
 export const metadata: Metadata = {
-  title: 'OTTOKI - AS 서비스 센터',
-  description: 'OTTOKI 제품 AS 접수 및 신규구매 문의',
+  title: 'AINC - AS 서비스 센터',
+  description: 'AINC 제품 AS 접수 및 신규구매 문의',
 }
 
 export default function RootLayout({
