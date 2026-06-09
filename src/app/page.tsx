@@ -53,7 +53,7 @@ export default function HomePage() {
       {/* 히어로 섹션 */}
       <div className='text-center mb-12'>
         <h1 className='text-3xl sm:text-4xl font-bold text-slate-900 mb-4'>
-          OTTOKI 서비스 센터
+          AINC 서비스 센터
         </h1>
         <p className='text-lg text-slate-500 max-w-xl mx-auto'>
           AS 접수부터 신규구매 문의까지, 빠르고 편리하게 이용하세요.
