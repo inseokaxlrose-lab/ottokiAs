@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { BANK_INFO } from './types'
 
 // Resend 인스턴스를 함수 호출 시점에 생성 (빌드 타임 환경변수 오류 방지)
 function getResend() {
@@ -84,7 +85,7 @@ export async function sendPurchaseConfirmEmail(params: {
   })
 }
 
-// AS 입금 확인 이메일 (고객용) — payment_confirmed 상태 시 발송
+// AS 입금 요청 이메일 (고객용) — payment_confirmed 상태 시 발송
 export async function sendAsPaymentConfirmedEmail(params: {
   email: string
   customerName: string
@@ -95,25 +96,43 @@ export async function sendAsPaymentConfirmedEmail(params: {
   await getResend().emails.send({
     from: FROM(),
     to: email,
-    subject: `[AINC] 수리비 입금이 확인되었습니다 — ${receiptNumber}`,
+    subject: `[AINC] 수리비 입금 안내 — ${receiptNumber}`,
     html: `
       <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
         <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
           <h1 style="color: #2563eb; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
-          <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">수리비 입금이 확인되었습니다</h2>
+          <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">수리비 입금 안내</h2>
 
           <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
-            <strong>${customerName}</strong>님, 수리비 입금을 확인하였습니다.<br>
-            빠른 시일 내에 수리를 진행하겠습니다.
+            <strong>${customerName}</strong>님, 제품 진단이 완료되었습니다.<br>
+            아래 계좌로 수리비를 입금해 주시면 수리를 진행하겠습니다.
           </p>
 
-          <div style="background: #f1f5f9; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+          <div style="background: #f1f5f9; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;">
             <p style="margin: 0 0 8px; color: #64748b; font-size: 13px;">접수번호</p>
             <p style="margin: 0; color: #1e293b; font-size: 20px; font-weight: 700; letter-spacing: 1px;">${receiptNumber}</p>
           </div>
 
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
+            <p style="margin: 0 0 10px; color: #1d4ed8; font-size: 13px; font-weight: 600;">입금 계좌 정보</p>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 4px 0; color: #64748b; font-size: 14px; width: 60px;">은행</td>
+                <td style="padding: 4px 0; color: #1e293b; font-size: 14px; font-weight: 600;">${BANK_INFO.bank}</td>
+              </tr>
+              <tr>
+                <td style="padding: 4px 0; color: #64748b; font-size: 14px;">계좌번호</td>
+                <td style="padding: 4px 0; color: #1e293b; font-size: 14px; font-weight: 600;">${BANK_INFO.account}</td>
+              </tr>
+              <tr>
+                <td style="padding: 4px 0; color: #64748b; font-size: 14px;">예금주</td>
+                <td style="padding: 4px 0; color: #1e293b; font-size: 14px; font-weight: 600;">${BANK_INFO.holder}</td>
+              </tr>
+            </table>
+          </div>
+
           <p style="color: #94a3b8; font-size: 13px; margin: 0; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-            수리 완료 후 별도 안내 메일을 발송해 드립니다.
+            입금 확인 후 수리를 진행하며, 완료 시 별도 안내 메일을 발송해 드립니다.
           </p>
         </div>
       </div>

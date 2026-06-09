@@ -4,7 +4,7 @@ export type AsStatus =
   | 'delivery_received'  // 택배수령
   | 'symptom_checked'    // 증상확인
   | 'quote_sent'         // 접수결과
-  | 'payment_confirmed'  // 입금확인
+  | 'payment_confirmed'  // 입금요청
   | 'repairing'          // 수리진행
   | 'cancelled'          // 수리취소
   | 'completed'          // 수리완료
@@ -16,7 +16,7 @@ export const statusLabel: Record<AsStatus, string> = {
   delivery_received: '택배수령',
   symptom_checked:   '증상확인중',
   quote_sent:        '접수결과',
-  payment_confirmed: '입금확인',
+  payment_confirmed: '입금요청',
   repairing:         '수리진행',
   cancelled:         '수리취소',
   completed:         '수리완료',
