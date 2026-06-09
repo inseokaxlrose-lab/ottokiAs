@@ -47,35 +47,6 @@ export async function PATCH(
       await supabase.from('as_status_history').insert({ request_id: id, status })
     } catch { /* 테이블 미생성 시 무시 */ }
 
-    // 특정 상태 변경 시 고객 이메일 발송
-    if (status === 'payment_confirmed' || status === 'shipped') {
-      const { data: reqData } = await supabase
-        .from('as_requests')
-        .select('email, customer_name, receipt_number, courier_company, tracking_number')
-        .eq('id', id)
-        .single()
-      if (reqData?.email) {
-        if (status === 'payment_confirmed') {
-          await Promise.allSettled([
-            sendAsPaymentConfirmedEmail({
-              email: reqData.email,
-              customerName: reqData.customer_name,
-              receiptNumber: reqData.receipt_number,
-            }),
-          ])
-        } else if (status === 'shipped') {
-          await Promise.allSettled([
-            sendAsShippedEmail({
-              email: reqData.email,
-              customerName: reqData.customer_name,
-              receiptNumber: reqData.receipt_number,
-              courierCompany: reqData.courier_company ?? null,
-              trackingNumber: reqData.tracking_number ?? null,
-            }),
-          ])
-        }
-      }
-    }
   }
 
   // AS 결과 등록/수정 — 기존 행 모두 삭제 후 새로 삽입 (중복 행 방지)
@@ -95,6 +66,34 @@ export async function PATCH(
     if (error) {
       console.error('AS 결과 저장 오류:', error)
       return NextResponse.json({ error: `AS 결과 저장 실패: ${error.message}` }, { status: 500 })
+    }
+
+    // 결과 저장 시 현재 상태값 확인 후 이메일 발송
+    const { data: reqData } = await supabase
+      .from('as_requests')
+      .select('email, customer_name, receipt_number, status, courier_company, tracking_number')
+      .eq('id', id)
+      .single()
+    if (reqData?.email) {
+      if (reqData.status === 'payment_confirmed') {
+        await Promise.allSettled([
+          sendAsPaymentConfirmedEmail({
+            email: reqData.email,
+            customerName: reqData.customer_name,
+            receiptNumber: reqData.receipt_number,
+          }),
+        ])
+      } else if (reqData.status === 'shipped') {
+        await Promise.allSettled([
+          sendAsShippedEmail({
+            email: reqData.email,
+            customerName: reqData.customer_name,
+            receiptNumber: reqData.receipt_number,
+            courierCompany: reqData.courier_company ?? null,
+            trackingNumber: reqData.tracking_number ?? null,
+          }),
+        ])
+      }
     }
   }
 
