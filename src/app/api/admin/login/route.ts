@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ success: true })
   res.cookies.set('admin-session', sessionSecret, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // HTTPS 환경(Vercel)에서는 secure 필수
     path: '/',
     maxAge: 60 * 60 * 8, // 8시간
     sameSite: 'lax',
