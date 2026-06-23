@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { sendAsConfirmEmail } from '@/lib/email'
 import { notifyAsSubmit } from '@/lib/slack'
-import { notifyAsSubmitKakao } from '@/lib/kakao'
+import { notifyAsSubmitTelegram } from '@/lib/telegram'
 
 // 접수번호 생성: AS-YYYYMMDD-NNNN 형식
 async function generateReceiptNumber(supabase: ReturnType<typeof createServerClient>): Promise<string> {
@@ -95,11 +95,11 @@ export async function POST(req: NextRequest) {
     // 초기 상태 이력 기록
     await supabase.from('as_status_history').insert({ request_id: data.id, status: 'received' })
 
-    // 접수 완료 이메일 + Slack + 카카오톡 알림 발송 (실패해도 접수 자체는 성공으로 처리)
+    // 접수 완료 이메일 + Slack + 텔레그램 알림 발송 (실패해도 접수 자체는 성공으로 처리)
     await Promise.allSettled([
       sendAsConfirmEmail({ email, customerName, receiptNumber, productName }),
       notifyAsSubmit({ receiptNumber, customerName, phone, productName, symptom }),
-      notifyAsSubmitKakao({ receiptNumber, customerName, phone, productName, symptom }),
+      notifyAsSubmitTelegram({ receiptNumber, customerName, phone, productName, symptom }),
     ])
 
     return NextResponse.json({ success: true, receipt_number: receiptNumber, id: data.id })
