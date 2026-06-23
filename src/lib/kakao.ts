@@ -76,11 +76,13 @@ async function sendKakaoMemo(text: string): Promise<void> {
   if (!accessToken) return
 
   // 텍스트 템플릿은 최대 200자 + link 객체가 필수
-  const linkUrl = process.env.KAKAO_LINK_URL || 'https://aigroup.co.kr'
+  // button_title로 버튼 이름 지정 → 누르면 link(관리자 페이지)로 이동
+  const linkUrl = process.env.KAKAO_LINK_URL || 'https://ainc-service.vercel.app/admin'
   const templateObject = {
     object_type: 'text',
     text: text.slice(0, 200),
     link: { web_url: linkUrl, mobile_web_url: linkUrl },
+    button_title: '관리자 페이지 바로가기',
   }
 
   const res = await fetch('https://kapi.kakao.com/v2/api/talk/memo/default/send', {
