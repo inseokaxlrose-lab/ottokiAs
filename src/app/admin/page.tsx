@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +21,10 @@ export default function AdminLoginPage() {
       const json = await res.json()
 
       if (!res.ok) throw new Error(json.error ?? '로그인 실패')
-      router.push('/admin/dashboard')
+      // 인증 쿠키 설정 직후에는 soft navigation(router.push) 대신
+      // hard navigation을 사용해야 라우터 캐시를 비우고 쿠키를 확실히 포함한
+      // 요청으로 proxy 인증을 통과한다.
+      window.location.href = '/admin/dashboard'
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류가 발생했습니다.')
     } finally {
