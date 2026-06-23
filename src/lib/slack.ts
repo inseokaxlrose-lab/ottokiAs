@@ -10,6 +10,11 @@ async function sendSlackMessage(text: string): Promise<void> {
   })
 }
 
+// 일반 경고/알림 (예: 카카오 토큰 갱신 실패)
+export async function sendSlackAlert(text: string) {
+  await sendSlackMessage(text)
+}
+
 // AS 접수 알림
 export async function notifyAsSubmit(params: {
   receiptNumber: string

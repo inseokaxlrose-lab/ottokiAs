@@ -143,3 +143,13 @@ CREATE TABLE IF NOT EXISTS as_status_history (
 -- Storage > Buckets에서 'as-photos', 'partner-docs' 버킷을 직접 생성하세요.
 -- as-photos: AS 접수 사진 저장용 (Public)
 -- partner-docs: 사업자등록증 저장용 (Public)
+
+-- ============================================================
+-- app_secrets 테이블 (런타임에 갱신되는 토큰 등 보관)
+-- 카카오 refresh token 자동 갱신에 사용. 새 토큰 발급 시 여기에 덮어씀.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS app_secrets (
+  key text PRIMARY KEY,
+  value text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
