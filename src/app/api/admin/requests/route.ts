@@ -38,5 +38,9 @@ export async function GET() {
     return NextResponse.json({ error: '조회 실패' }, { status: 500 })
   }
 
-  return NextResponse.json({ data: normalizeResults((data ?? []) as Record<string, unknown>[]) })
+  // 삭제된 접수(deleted_at 값 있음)는 목록에서 제외
+  // (컬럼이 아직 없으면 deleted_at은 undefined이므로 모두 표시됨)
+  const rows = ((data ?? []) as Record<string, unknown>[]).filter((r) => r.deleted_at == null)
+
+  return NextResponse.json({ data: normalizeResults(rows) })
 }

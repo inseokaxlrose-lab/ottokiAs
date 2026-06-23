@@ -99,3 +99,27 @@ export async function PATCH(
 
   return NextResponse.json({ success: true })
 }
+
+// 접수 삭제 (소프트 삭제: 실제로 지우지 않고 deleted_at에 시각 기록)
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = createServerClient()
+
+  const { error } = await supabase
+    .from('as_requests')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) {
+    // deleted_at 컬럼이 없으면 Supabase SQL을 먼저 실행해야 함
+    return NextResponse.json(
+      { error: '삭제 실패. Supabase에 deleted_at 컬럼 SQL을 먼저 실행해주세요.' },
+      { status: 500 }
+    )
+  }
+
+  return NextResponse.json({ success: true })
+}

@@ -252,6 +252,19 @@ export default function AdminDashboardPage() {
     }
   }
 
+  // 접수 삭제 (소프트 삭제 → 목록에서 숨김)
+  async function deleteRequest(id: string) {
+    if (!confirm('이 접수를 삭제하시겠습니까?\n삭제하면 목록에서 보이지 않습니다.')) return
+    const res = await fetch(`/api/admin/requests/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      alert((await res.json().catch(() => ({}))).error ?? '삭제 실패. Supabase SQL을 먼저 실행해주세요.')
+      return
+    }
+    // 화면 목록에서 제거 + 상세 닫기
+    setRequests((prev) => prev.filter((r) => r.id !== id))
+    setSelected(null)
+  }
+
   // ── 신규구매 ──
   async function updatePurchaseStatus(id: string, status: PurchaseStatus) {
     const res = await fetch(`/api/admin/purchases/${id}`, {
@@ -702,6 +715,14 @@ export default function AdminDashboardPage() {
                       className='w-full py-2.5 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white font-semibold rounded-xl transition-colors text-sm'
                     >
                       {saving ? '저장 중...' : '결과 저장'}
+                    </button>
+                    {/* 삭제 버튼: 폼 제출이 아니라 별도 동작이므로 type='button' */}
+                    <button
+                      type='button'
+                      onClick={() => deleteRequest(selected.id)}
+                      className='w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors text-sm'
+                    >
+                      삭제
                     </button>
                   </form>
                 </div>

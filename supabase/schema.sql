@@ -129,6 +129,10 @@ ALTER TABLE as_requests
 ALTER TABLE as_requests
   ADD COLUMN IF NOT EXISTS tracking_number text;
 
+-- 소프트 삭제용: 값이 있으면 삭제된 접수 (화면에 표시 안 함)
+ALTER TABLE as_requests
+  ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
 -- ============================================================
 -- as_status_history 테이블 (상태 변경 이력)
 -- ============================================================
