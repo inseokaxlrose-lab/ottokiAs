@@ -213,6 +213,7 @@ export default function SubmitPage() {
               name='purchase_date'
               value={form.purchase_date}
               onChange={handleChange}
+              autoComplete='off'
               className='h-10 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent w-full sm:w-48'
             />
           </label>
