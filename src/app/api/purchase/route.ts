@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { sendPurchaseConfirmEmail, sendPurchaseAdminAlert } from '@/lib/email'
 import { notifyPurchaseSubmit } from '@/lib/slack'
+import { notifyPurchaseSubmitTelegram } from '@/lib/telegram'
 
 export async function POST(req: NextRequest) {
   try {
@@ -76,11 +77,13 @@ export async function POST(req: NextRequest) {
       } catch { /* 테이블 미생성 시 무시 */ }
     }
 
-    // 고객 확인 이메일 + 관리자 알림 이메일 + Slack 알림 발송
+    // 고객 확인 이메일 + 관리자 알림(이메일/Slack/텔레그램) 발송
+    // allSettled: 하나가 실패해도 나머지는 계속 발송하고, 접수 자체는 성공 처리
     await Promise.allSettled([
       sendPurchaseConfirmEmail({ email, customerName }),
       sendPurchaseAdminAlert({ customerName, phone, email, productName, quantity, inquiry, businessDocUrl }),
       notifyPurchaseSubmit({ customerName, phone, productName, quantity }),
+      notifyPurchaseSubmitTelegram({ customerName, phone, email, productName, quantity, inquiry }),
     ])
 
     return NextResponse.json({ success: true })

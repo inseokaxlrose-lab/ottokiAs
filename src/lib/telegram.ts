@@ -40,3 +40,27 @@ export async function notifyAsSubmitTelegram(params: {
 
   await sendTelegramMessage(text)
 }
+
+// 신규구매 접수 알림 (텔레그램)
+export async function notifyPurchaseSubmitTelegram(params: {
+  customerName: string
+  phone: string
+  email: string
+  productName: string
+  quantity: number
+  inquiry: string
+}) {
+  const lines = [
+    '🛒 새 신규구매가 등록되었습니다',
+    `고객명: ${params.customerName} (${params.phone})`,
+    `이메일: ${params.email}`,
+    `제품: ${params.productName} / ${params.quantity}개`,
+  ]
+
+  // 문의내용은 있을 때만, 너무 길면 100자까지만 표시
+  if (params.inquiry) {
+    lines.push(`문의: ${params.inquiry.slice(0, 100)}${params.inquiry.length > 100 ? '...' : ''}`)
+  }
+
+  await sendTelegramMessage(lines.join('\n'))
+}
