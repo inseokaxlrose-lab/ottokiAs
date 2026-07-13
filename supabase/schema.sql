@@ -48,9 +48,21 @@ CREATE TABLE IF NOT EXISTS purchase_requests (
   address text,
   address_detail text,
   status text NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'confirmed', 'cancelled')),
+    CHECK (status IN ('pending', 'waiting_payment', 'preparing', 'shipped', 'cancelled')),
+  deleted_at timestamptz,                   -- 소프트 삭제용: 값이 있으면 목록에 표시 안 함
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- 신규구매 상태 변경 이력 테이블
+CREATE TABLE IF NOT EXISTS purchase_status_history (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  request_id uuid NOT NULL REFERENCES purchase_requests(id) ON DELETE CASCADE,
+  status text NOT NULL,
+  changed_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_purchase_status_history_request_id
+  ON purchase_status_history(request_id);
 
 -- updated_at 자동 갱신 함수
 CREATE OR REPLACE FUNCTION update_updated_at()
