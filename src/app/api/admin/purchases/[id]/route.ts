@@ -24,3 +24,26 @@ export async function PATCH(
 
   return NextResponse.json({ success: true })
 }
+
+// 신규구매 삭제 (소프트 삭제: 실제로 지우지 않고 deleted_at에 시각만 기록)
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = createServerClient()
+
+  const { error } = await supabase
+    .from('purchase_requests')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) {
+    return NextResponse.json(
+      { error: '삭제 실패. Supabase에 deleted_at 컬럼 SQL을 먼저 실행해주세요.' },
+      { status: 500 }
+    )
+  }
+
+  return NextResponse.json({ success: true })
+}

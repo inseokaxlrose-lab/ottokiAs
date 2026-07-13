@@ -24,5 +24,8 @@ export async function GET() {
     return NextResponse.json({ error: '조회 실패' }, { status: 500 })
   }
 
-  return NextResponse.json({ data })
+  // 소프트 삭제된 건은 목록에서 제외 (deleted_at 에 값이 있으면 삭제된 것)
+  const rows = ((data ?? []) as Record<string, unknown>[]).filter((r) => r.deleted_at == null)
+
+  return NextResponse.json({ data: rows })
 }

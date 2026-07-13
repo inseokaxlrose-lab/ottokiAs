@@ -294,6 +294,19 @@ export default function AdminDashboardPage() {
     setSelectedPurchase((prev) => prev?.id === id ? { ...prev, status } : prev)
   }
 
+  // 신규구매 삭제 (소프트 삭제 → 목록에서 숨김)
+  async function deletePurchase(id: string) {
+    if (!confirm('이 신규구매 접수를 삭제하시겠습니까?\n삭제하면 목록에서 보이지 않습니다.')) return
+    const res = await fetch(`/api/admin/purchases/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      alert((await res.json().catch(() => ({}))).error ?? '삭제 실패. Supabase SQL을 먼저 실행해주세요.')
+      return
+    }
+    // 화면 목록에서 제거 + 상세 닫기
+    setPurchases((prev) => prev.filter((p) => p.id !== id))
+    setSelectedPurchase(null)
+  }
+
   // ── 거래처 관리 ──
   function openCreatePartner() {
     setSelectedPartner(null)
@@ -843,6 +856,16 @@ export default function AdminDashboardPage() {
                 <div className='border-t border-slate-100 pt-4 mt-1'>
                   <p className='text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2'>입금 계좌</p>
                   <p className='text-xs text-slate-600'>{BANK_INFO.bank} {BANK_INFO.account} ({BANK_INFO.holder})</p>
+                </div>
+                {/* 삭제 버튼 (소프트 삭제 → 목록에서만 숨김) */}
+                <div className='border-t border-slate-100 pt-4'>
+                  <button
+                    type='button'
+                    onClick={() => deletePurchase(selectedPurchase.id)}
+                    className='w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors text-sm'
+                  >
+                    삭제
+                  </button>
                 </div>
               </div>
             )}
