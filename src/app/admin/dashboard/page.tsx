@@ -889,7 +889,7 @@ export default function AdminDashboardPage() {
                     )
                   : partners
                 if (!loadingPartner && q && filtered.length === 0) {
-                  return <p className='text-center py-8 text-slate-400 text-sm'>'{partnerSearch}'에 대한 결과가 없습니다.</p>
+                  return <p className='text-center py-8 text-slate-400 text-sm'>&lsquo;{partnerSearch}&rsquo;에 대한 결과가 없습니다.</p>
                 }
                 return (
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
