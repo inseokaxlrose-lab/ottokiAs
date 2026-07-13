@@ -24,6 +24,20 @@ const ALL_STATUSES: AsStatus[] = [
   'cancelled', 'completed', 'shipped',
 ]
 
+// 신규구매 상태 뱃지 색상
+const purchaseColor: Record<PurchaseStatus, string> = {
+  pending:         'bg-blue-100 text-blue-700',
+  waiting_payment: 'bg-yellow-100 text-yellow-700',
+  preparing:       'bg-orange-100 text-orange-700',
+  shipped:         'bg-teal-100 text-teal-700',
+  cancelled:       'bg-slate-100 text-slate-500',
+}
+
+// 신규구매 상태 변경 버튼 순서 (접수완료 → 입금대기 → 상품 준비중 → 발송완료, 취소)
+const ALL_PURCHASE_STATUSES: PurchaseStatus[] = [
+  'pending', 'waiting_payment', 'preparing', 'shipped', 'cancelled',
+]
+
 // 결과 입력 폼 초기값
 const emptyResult = { repair_detail: '', cost: '', completed_at: '', note: '' }
 
@@ -751,13 +765,8 @@ export default function AdminDashboardPage() {
                     <p className='text-xs text-slate-400'>{new Date(item.created_at).toLocaleDateString('ko-KR')}</p>
                     <p className='font-semibold text-slate-900 text-sm'>{item.customer_name}</p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    item.status === 'shipped' ? 'bg-teal-100 text-teal-700'
-                    : item.status === 'cancelled' ? 'bg-slate-100 text-slate-500'
-                    : item.status === 'waiting_payment' ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {purchaseStatusLabel[item.status as keyof typeof purchaseStatusLabel] ?? item.status}
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseColor[item.status]}`}>
+                    {purchaseStatusLabel[item.status] ?? item.status}
                   </span>
                 </div>
                 <div className='text-sm text-slate-600'>
@@ -779,12 +788,7 @@ export default function AdminDashboardPage() {
               <div className='bg-white rounded-xl border border-slate-200 p-5 space-y-4 sticky top-24'>
                 <div className='flex items-center justify-between'>
                   <h2 className='font-bold text-slate-900'>신규구매 상세</h2>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    selectedPurchase.status === 'shipped' ? 'bg-teal-100 text-teal-700'
-                    : selectedPurchase.status === 'cancelled' ? 'bg-slate-100 text-slate-500'
-                    : selectedPurchase.status === 'waiting_payment' ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-blue-100 text-blue-700'
-                  }`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${purchaseColor[selectedPurchase.status]}`}>
                     {purchaseStatusLabel[selectedPurchase.status]}
                   </span>
                 </div>
@@ -810,7 +814,7 @@ export default function AdminDashboardPage() {
                 <div className='border-t border-slate-100 pt-4 mt-4'>
                   <p className='text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2'>진행 상태 변경</p>
                   <div className='flex flex-wrap gap-2'>
-                    {(['pending', 'waiting_payment', 'shipped', 'cancelled'] as const).map((s) => (
+                    {ALL_PURCHASE_STATUSES.map((s) => (
                       <button
                         key={s}
                         onClick={() => updatePurchaseStatus(selectedPurchase.id, s)}

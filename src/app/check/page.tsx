@@ -21,6 +21,7 @@ const statusStyle: Record<AsStatus, { bg: string; text: string; dot: string }> =
 const purchaseStyle: Record<PurchaseStatus, { bg: string; text: string; dot: string }> = {
   pending:         { bg: 'bg-blue-50',   text: 'text-blue-700',  dot: 'bg-blue-400' },
   waiting_payment: { bg: 'bg-yellow-50', text: 'text-yellow-700',dot: 'bg-yellow-400' },
+  preparing:       { bg: 'bg-orange-50', text: 'text-orange-700',dot: 'bg-orange-400' },
   shipped:         { bg: 'bg-teal-50',   text: 'text-teal-700',  dot: 'bg-teal-500' },
   cancelled:       { bg: 'bg-slate-100', text: 'text-slate-500', dot: 'bg-slate-400' },
 }
@@ -31,8 +32,8 @@ const statusSteps: AsStatus[] = [
   'quote_sent', 'payment_confirmed', 'repairing', 'completed', 'shipped',
 ]
 
-// 신규구매 타임라인 순서
-const purchaseSteps: PurchaseStatus[] = ['pending', 'waiting_payment', 'shipped']
+// 신규구매 타임라인 순서 (취소 제외)
+const purchaseSteps: PurchaseStatus[] = ['pending', 'waiting_payment', 'preparing', 'shipped']
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })

@@ -24,11 +24,18 @@ export const statusLabel: Record<AsStatus, string> = {
 }
 
 // 신규구매 상태값
-export type PurchaseStatus = 'pending' | 'waiting_payment' | 'shipped' | 'cancelled'
+// 진행 순서: 접수완료 → 입금대기 → 상품 준비중 → 발송완료 (cancelled는 별도 취소 상태)
+export type PurchaseStatus =
+  | 'pending'          // 접수완료
+  | 'waiting_payment'  // 입금대기
+  | 'preparing'        // 상품 준비중
+  | 'shipped'          // 발송완료
+  | 'cancelled'        // 취소
 
 export const purchaseStatusLabel: Record<PurchaseStatus, string> = {
   pending:         '접수완료',
   waiting_payment: '입금대기',
+  preparing:       '상품 준비중',
   shipped:         '발송완료',
   cancelled:       '취소',
 }
