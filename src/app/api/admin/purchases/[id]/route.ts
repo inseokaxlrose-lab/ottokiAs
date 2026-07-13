@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { sendPurchaseConfirmedEmail } from '@/lib/email'
 
 // 신규구매 상태 변경
 export async function PATCH(
@@ -22,23 +21,6 @@ export async function PATCH(
   try {
     await supabase.from('purchase_status_history').insert({ request_id: id, status })
   } catch { /* 테이블 미생성 시 무시 */ }
-
-  // 주문 확인 상태 시 고객 이메일 발송
-  if (status === 'confirmed') {
-    const { data: purchase } = await supabase
-      .from('purchase_requests')
-      .select('email, customer_name')
-      .eq('id', id)
-      .single()
-    if (purchase?.email) {
-      await Promise.allSettled([
-        sendPurchaseConfirmedEmail({
-          email: purchase.email,
-          customerName: purchase.customer_name,
-        }),
-      ])
-    }
-  }
 
   return NextResponse.json({ success: true })
 }

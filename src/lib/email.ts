@@ -191,37 +191,6 @@ export async function sendAsShippedEmail(params: {
   })
 }
 
-// 신규구매 주문 확인 이메일 (고객용) — confirmed 상태 시 발송
-export async function sendPurchaseConfirmedEmail(params: {
-  email: string
-  customerName: string
-}) {
-  const { email, customerName } = params
-
-  await getResend().emails.send({
-    from: FROM(),
-    to: email,
-    subject: '[AINC] 구매 주문이 확인되었습니다',
-    html: `
-      <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 600px; margin: 0 auto; padding: 32px 24px; background: #f8fafc;">
-        <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-          <h1 style="color: #7c3aed; font-size: 22px; margin: 0 0 8px;">AINC 서비스 센터</h1>
-          <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 24px;">구매 주문이 확인되었습니다</h2>
-
-          <p style="color: #475569; margin: 0 0 24px; line-height: 1.7;">
-            <strong>${customerName}</strong>님, 구매 주문을 확인하였습니다.<br>
-            담당자가 배송 일정 등 상세 안내를 위해 별도로 연락드리겠습니다.
-          </p>
-
-          <p style="color: #94a3b8; font-size: 13px; margin: 0; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-            이용해 주셔서 감사합니다.
-          </p>
-        </div>
-      </div>
-    `,
-  })
-}
-
 // 신규구매 접수 알림 이메일 (관리자용)
 export async function sendPurchaseAdminAlert(params: {
   customerName: string
