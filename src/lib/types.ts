@@ -135,3 +135,13 @@ export interface PurchaseStatusHistory {
   status: PurchaseStatus
   changed_at: string
 }
+
+// 오류 로그 테이블 타입
+export interface ErrorLog {
+  id: string
+  context: string | null       // 오류 발생 위치
+  message: string              // 오류 메시지
+  stack: string | null         // 스택 트레이스
+  meta: Record<string, unknown> | null  // 추가 정보
+  created_at: string
+}
