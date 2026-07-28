@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase'
 import { sendPurchaseConfirmEmail, sendPurchaseAdminAlert } from '@/lib/email'
 import { notifyPurchaseSubmit } from '@/lib/slack'
 import { notifyPurchaseSubmitTelegram } from '@/lib/telegram'
+import { logError } from '@/lib/errorLog'
 
 export async function POST(req: NextRequest) {
   try {
@@ -88,7 +89,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('구매 요청 오류:', err)
+    // 오류를 DB(error_logs)에 기록
+    await logError('POST /api/purchase', err)
     return NextResponse.json({ error: '처리 중 오류가 발생했습니다.' }, { status: 500 })
   }
 }

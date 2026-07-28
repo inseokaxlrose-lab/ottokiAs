@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase'
 import { sendAsConfirmEmail } from '@/lib/email'
 import { notifyAsSubmit } from '@/lib/slack'
 import { notifyAsSubmitTelegram } from '@/lib/telegram'
+import { logError } from '@/lib/errorLog'
 
 // 접수번호 생성: AS-YYYYMMDD-NNNN 형식
 async function generateReceiptNumber(supabase: ReturnType<typeof createServerClient>): Promise<string> {
@@ -105,7 +106,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, receipt_number: receiptNumber, id: data.id })
   } catch (err) {
     const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? String(err)
-    console.error('AS 접수 오류:', msg)
+    // 오류를 DB(error_logs)에 기록
+    await logError('POST /api/submit', err)
     // Supabase 연결 오류 → 환경변수 미설정 안내
     if (msg.includes('fetch failed') || msg.includes('ENOTFOUND')) {
       return NextResponse.json({ error: 'DB 연결에 실패했습니다. Supabase 환경변수를 확인해 주세요.' }, { status: 500 })

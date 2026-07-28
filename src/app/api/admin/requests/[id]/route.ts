@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { sendAsPaymentConfirmedEmail, sendAsShippedEmail } from '@/lib/email'
+import { logError } from '@/lib/errorLog'
 
 // 접수 상태 변경 및 AS 결과 등록
 export async function PATCH(
@@ -64,7 +65,7 @@ export async function PATCH(
 
     const { error } = await supabase.from('as_results').insert({ request_id: id, ...payload })
     if (error) {
-      console.error('AS 결과 저장 오류:', error)
+      await logError('PATCH /api/admin/requests/[id]', error, { id })
       return NextResponse.json({ error: `AS 결과 저장 실패: ${error.message}` }, { status: 500 })
     }
 

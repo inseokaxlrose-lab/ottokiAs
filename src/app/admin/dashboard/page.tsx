@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import type { AsRequest, AsStatus, PurchaseRequest, PurchaseStatus, Partner } from '@/lib/types'
+import type { AsRequest, AsStatus, PurchaseRequest, PurchaseStatus, Partner, ErrorLog } from '@/lib/types'
 import { statusLabel, purchaseStatusLabel, BANK_INFO } from '@/lib/types'
 
 // 상태 뱃지 색상
@@ -51,8 +51,8 @@ const emptyPartnerForm = {
 export default function AdminDashboardPage() {
   const router = useRouter()
 
-  // 탭: AS접수 | 신규구매 | 거래처관리
-  const [tab, setTab] = useState<'as' | 'purchase' | 'partner'>('as')
+  // 탭: AS접수 | 신규구매 | 거래처관리 | 오류로그
+  const [tab, setTab] = useState<'as' | 'purchase' | 'partner' | 'error'>('as')
 
   // ── AS 접수 상태 ──
   const [requests, setRequests] = useState<AsRequest[]>([])
@@ -94,6 +94,11 @@ export default function AdminDashboardPage() {
   const [partnerSaving, setPartnerSaving] = useState(false)
   const [partnerDocFile, setPartnerDocFile] = useState<File | null>(null)
 
+  // ── 오류 로그 상태 ──
+  const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
+  const [loadingErrors, setLoadingErrors] = useState(false)
+  const [expandedError, setExpandedError] = useState<string | null>(null)  // 상세(스택) 펼친 로그 id
+
   // ── 데이터 로딩 ──
   const fetchRequests = useCallback(async () => {
     setLoadingAs(true)
@@ -130,11 +135,38 @@ export default function AdminDashboardPage() {
     }
   }, [])
 
+  // 오류 로그 목록 조회
+  const fetchErrors = useCallback(async () => {
+    setLoadingErrors(true)
+    try {
+      const res = await fetch('/api/admin/errors')
+      if (res.status === 401 || res.status === 403) { router.push('/admin'); return }
+      const json = await res.json()
+      setErrorLogs(json.data ?? [])
+    } finally {
+      setLoadingErrors(false)
+    }
+  }, [router])
+
   useEffect(() => {
     fetchRequests()
     fetchPurchases()
     fetchPartners()
   }, [fetchRequests, fetchPurchases, fetchPartners])
+
+  // 오류 로그 탭을 열 때마다 최신 목록을 다시 불러옴
+  useEffect(() => {
+    if (tab === 'error') fetchErrors()
+  }, [tab, fetchErrors])
+
+  // 오류 로그 전체 비우기
+  async function clearErrors() {
+    if (!confirm('오류 로그를 모두 삭제하시겠습니까?')) return
+    const res = await fetch('/api/admin/errors', { method: 'DELETE' })
+    if (!res.ok) { alert('삭제 실패'); return }
+    setErrorLogs([])
+    setExpandedError(null)
+  }
 
   // ── AS 접수 ──
   function selectRequest(item: AsRequest) {
@@ -407,6 +439,7 @@ export default function AdminDashboardPage() {
           { key: 'as',      label: `AS 접수 (${requests.length})`,    activeColor: 'border-blue-600 text-blue-600' },
           { key: 'purchase', label: `신규구매 (${purchases.length})`, activeColor: 'border-purple-600 text-purple-600' },
           { key: 'partner',  label: `거래처 (${partners.length})`,    activeColor: 'border-emerald-600 text-emerald-600' },
+          { key: 'error',    label: '오류 로그',                       activeColor: 'border-red-600 text-red-600' },
         ] as const).map(({ key, label, activeColor }) => (
           <button
             key={key}
@@ -1151,6 +1184,87 @@ export default function AdminDashboardPage() {
               </form>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ─── 오류 로그 탭 ─── */}
+      {tab === 'error' && (
+        <div>
+          {/* 상단: 새로고침 / 전체삭제 버튼 */}
+          <div className='flex items-center justify-between mb-4'>
+            <p className='text-sm text-slate-500'>
+              최근 오류 {errorLogs.length}건 (최대 200건 표시)
+            </p>
+            <div className='flex gap-2'>
+              <button
+                onClick={fetchErrors}
+                className='px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors'
+              >
+                새로고침
+              </button>
+              <button
+                onClick={clearErrors}
+                disabled={errorLogs.length === 0}
+                className='px-3 py-1.5 text-xs font-medium border border-red-200 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors'
+              >
+                전체 삭제
+              </button>
+            </div>
+          </div>
+
+          {loadingErrors && <div className='text-center py-12 text-slate-400 text-sm'>불러오는 중...</div>}
+          {!loadingErrors && errorLogs.length === 0 && (
+            <div className='text-center py-12 text-slate-400 text-sm'>기록된 오류가 없습니다. 👍</div>
+          )}
+
+          <div className='space-y-2'>
+            {errorLogs.map((log) => (
+              <div key={log.id} className='bg-white rounded-xl border border-slate-200 p-4'>
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='min-w-0'>
+                    {/* 발생 위치 + 시각 */}
+                    <div className='flex items-center gap-2 flex-wrap mb-1'>
+                      {log.context && (
+                        <span className='px-2 py-0.5 rounded-md text-xs font-medium bg-red-50 text-red-600'>
+                          {log.context}
+                        </span>
+                      )}
+                      <span className='text-xs text-slate-400'>
+                        {new Date(log.created_at).toLocaleString('ko-KR')}
+                      </span>
+                    </div>
+                    {/* 오류 메시지 */}
+                    <p className='text-sm text-slate-800 break-words'>{log.message}</p>
+                  </div>
+                  {/* 스택/추가정보가 있으면 상세보기 토글 */}
+                  {(log.stack || log.meta) && (
+                    <button
+                      onClick={() => setExpandedError(expandedError === log.id ? null : log.id)}
+                      className='text-xs text-blue-500 hover:text-blue-700 underline underline-offset-2 shrink-0'
+                    >
+                      {expandedError === log.id ? '접기' : '상세'}
+                    </button>
+                  )}
+                </div>
+
+                {/* 상세: 스택 트레이스 + 추가 정보 */}
+                {expandedError === log.id && (
+                  <div className='mt-3 pt-3 border-t border-slate-100 space-y-2'>
+                    {log.meta && (
+                      <pre className='text-xs bg-slate-50 rounded-lg p-3 overflow-x-auto text-slate-600'>
+                        {JSON.stringify(log.meta, null, 2)}
+                      </pre>
+                    )}
+                    {log.stack && (
+                      <pre className='text-xs bg-slate-50 rounded-lg p-3 overflow-x-auto text-slate-500 whitespace-pre-wrap'>
+                        {log.stack}
+                      </pre>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
