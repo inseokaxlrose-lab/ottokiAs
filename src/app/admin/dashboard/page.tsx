@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import type { AsRequest, AsStatus, PurchaseRequest, PurchaseStatus, Partner, ErrorLog } from '@/lib/types'
+import type { AsRequest, AsStatus, PurchaseRequest, PurchaseStatus, Partner, ErrorLog, Heartbeat } from '@/lib/types'
 import { statusLabel, purchaseStatusLabel, BANK_INFO } from '@/lib/types'
 
 // 상태 뱃지 색상
@@ -51,8 +51,8 @@ const emptyPartnerForm = {
 export default function AdminDashboardPage() {
   const router = useRouter()
 
-  // 탭: AS접수 | 신규구매 | 거래처관리 | 오류로그
-  const [tab, setTab] = useState<'as' | 'purchase' | 'partner' | 'error'>('as')
+  // 탭: AS접수 | 신규구매 | 거래처관리 | 오류로그 | DB상태
+  const [tab, setTab] = useState<'as' | 'purchase' | 'partner' | 'error' | 'heartbeat'>('as')
 
   // ── AS 접수 상태 ──
   const [requests, setRequests] = useState<AsRequest[]>([])
@@ -98,6 +98,10 @@ export default function AdminDashboardPage() {
   const [errorLogs, setErrorLogs] = useState<ErrorLog[]>([])
   const [loadingErrors, setLoadingErrors] = useState(false)
   const [expandedError, setExpandedError] = useState<string | null>(null)  // 상세(스택) 펼친 로그 id
+
+  // ── DB 헬스체크 이력 상태 ──
+  const [heartbeats, setHeartbeats] = useState<Heartbeat[]>([])
+  const [loadingHeartbeats, setLoadingHeartbeats] = useState(false)
 
   // ── 데이터 로딩 ──
   const fetchRequests = useCallback(async () => {
@@ -154,10 +158,28 @@ export default function AdminDashboardPage() {
     fetchPartners()
   }, [fetchRequests, fetchPurchases, fetchPartners])
 
+  // DB 헬스체크 이력 조회
+  const fetchHeartbeats = useCallback(async () => {
+    setLoadingHeartbeats(true)
+    try {
+      const res = await fetch('/api/admin/heartbeats')
+      if (res.status === 401 || res.status === 403) { router.push('/admin'); return }
+      const json = await res.json()
+      setHeartbeats(json.data ?? [])
+    } finally {
+      setLoadingHeartbeats(false)
+    }
+  }, [router])
+
   // 오류 로그 탭을 열 때마다 최신 목록을 다시 불러옴
   useEffect(() => {
     if (tab === 'error') fetchErrors()
   }, [tab, fetchErrors])
+
+  // DB 상태 탭을 열 때마다 최신 이력을 다시 불러옴
+  useEffect(() => {
+    if (tab === 'heartbeat') fetchHeartbeats()
+  }, [tab, fetchHeartbeats])
 
   // 오류 로그 전체 비우기
   async function clearErrors() {
@@ -440,6 +462,7 @@ export default function AdminDashboardPage() {
           { key: 'purchase', label: `신규구매 (${purchases.length})`, activeColor: 'border-purple-600 text-purple-600' },
           { key: 'partner',  label: `거래처 (${partners.length})`,    activeColor: 'border-emerald-600 text-emerald-600' },
           { key: 'error',    label: '오류 로그',                       activeColor: 'border-red-600 text-red-600' },
+          { key: 'heartbeat', label: 'DB 상태',                        activeColor: 'border-cyan-600 text-cyan-600' },
         ] as const).map(({ key, label, activeColor }) => (
           <button
             key={key}
@@ -1265,6 +1288,75 @@ export default function AdminDashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ─── DB 상태 탭 ─── */}
+      {tab === 'heartbeat' && (
+        <div>
+          {/* 상단: 새로고침 버튼 */}
+          <div className='flex items-center justify-between mb-4'>
+            <p className='text-sm text-slate-500'>
+              최근 헬스체크 {heartbeats.length}건 (매일 자동 실행)
+            </p>
+            <button
+              onClick={fetchHeartbeats}
+              className='px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors'
+            >
+              새로고침
+            </button>
+          </div>
+
+          {loadingHeartbeats && <div className='text-center py-12 text-slate-400 text-sm'>불러오는 중...</div>}
+
+          {!loadingHeartbeats && (
+            <>
+              {/* 마지막 정상 실행 요약 카드 */}
+              {(() => {
+                const last = heartbeats[0]
+                if (!last) {
+                  return (
+                    <div className='bg-amber-50 border border-amber-200 rounded-xl p-5 text-center text-sm text-amber-700'>
+                      아직 실행 기록이 없습니다. 매일 오전 9시(한국시간)에 자동 실행됩니다.
+                    </div>
+                  )
+                }
+                // 마지막 실행이 몇 시간 전인지 계산
+                const diffMs = Date.now() - new Date(last.created_at).getTime()
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+                const diffDays = Math.floor(diffHours / 24)
+                const ago = diffDays > 0 ? `${diffDays}일 전` : diffHours > 0 ? `${diffHours}시간 전` : '방금 전'
+                // 24시간 넘게 실행이 없으면 주의 표시 (매일 도는 게 정상이므로)
+                const stale = diffHours >= 26
+                return (
+                  <div className={`rounded-xl p-5 mb-4 border ${stale ? 'bg-amber-50 border-amber-200' : 'bg-cyan-50 border-cyan-200'}`}>
+                    <p className='text-xs font-medium text-slate-500 mb-1'>마지막 정상 실행</p>
+                    <p className={`text-lg font-bold ${stale ? 'text-amber-700' : 'text-cyan-700'}`}>
+                      {new Date(last.created_at).toLocaleString('ko-KR')}
+                      <span className='text-sm font-normal ml-2'>({ago})</span>
+                    </p>
+                    <p className='text-xs text-slate-500 mt-1'>
+                      {stale
+                        ? '⚠️ 24시간 넘게 실행 기록이 없습니다. Cron 설정을 확인해 주세요.'
+                        : '✅ DB 연결이 정상적으로 유지되고 있습니다.'}
+                    </p>
+                  </div>
+                )
+              })()}
+
+              {/* 실행 이력 목록 */}
+              {heartbeats.length > 0 && (
+                <div className='bg-white rounded-xl border border-slate-200 divide-y divide-slate-100'>
+                  {heartbeats.map((hb) => (
+                    <div key={hb.id} className='flex items-center gap-2 px-4 py-2.5 text-sm'>
+                      <span className='text-cyan-500'>✔</span>
+                      <span className='text-slate-700'>{new Date(hb.created_at).toLocaleString('ko-KR')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 

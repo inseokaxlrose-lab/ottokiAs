@@ -136,6 +136,13 @@ export interface PurchaseStatusHistory {
   changed_at: string
 }
 
+// DB 헬스체크 실행 이력 타입
+export interface Heartbeat {
+  id: string
+  note: string | null
+  created_at: string
+}
+
 // 오류 로그 테이블 타입
 export interface ErrorLog {
   id: string
