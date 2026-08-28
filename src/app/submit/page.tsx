@@ -97,7 +97,7 @@ export default function SubmitPage() {
         <div>
           <p className='text-sm font-semibold text-amber-800'>택배 접수 주소</p>
           <p className='text-sm text-amber-700 mt-0.5'>
-            서울 강남구 언주로87길 6 MH빌딩 904호
+            서울 광진구 광나루로 436 율현빌딩 414호
           </p>
           <p className='text-xs text-amber-600 mt-1'>접수 후 위 주소로 제품을 발송해 주세요.</p>
         </div>
